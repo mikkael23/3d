@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Preço - Impressão 3D</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      margin: 0;
+      background: #f2f4f8;
+      color: #222;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    }
+
+    h1 {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+
+    p {
+      text-align: center;
+      color: #666;
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: bold;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px;
+      margin-top: 6px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    .fixo {
+      background: #eee;
+      color: #555;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 25px;
+      padding: 14px;
+      border: none;
+      border-radius: 8px;
+      background: #1f7ae0;
+      color: white;
+      font-size: 18px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #155fb0;
+    }
+
+    .resultado {
+      margin-top: 25px;
+      padding: 20px;
+      background: #f8f9fb;
+      border-radius: 10px;
+      border-left: 5px solid #1f7ae0;
+      display: none;
+    }
+
+    .linha {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+      gap: 15px;
+    }
+
+    .linha:last-child {
+      border-bottom: none;
+    }
+
+    .valor {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .destaque {
+      font-size: 20px;
+      color: #1f7ae0;
+    }
+
+    .precos {
+      margin-top: 20px;
+      padding: 15px;
+      background: #eef6ff;
+      border-radius: 8px;
+    }
+
+    .erro {
+      margin-top: 15px;
+      color: #b00020;
+      font-weight: bold;
+      text-align: center;
+      display: none;
+    }
+
+    small {
+      color: #777;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1>Calculadora de Preço 3D</h1>
+    <p>Informe apenas o peso da peça e as horas de impressão.</p>
+
+    <label>Preço do rolo de filamento</label>
+    <input class="fixo" type="number" id="precoRolo" value="89" readonly>
+
+    <label>Peso do rolo em gramas</label>
+    <input class="fixo" type="number" id="pesoRolo" value="1000" readonly>
+
+    <label>Quantidade usada na peça em gramas</label>
+    <input type="number" id="gramasUsadas" placeholder="Ex: 150" value="150" step="0.01">
+
+    <label>Horas de impressão</label>
+    <input type="number" id="horas" placeholder="Ex: 15" value="15" step="0.01">
+
+    <label>Consumo fixo da impressora em watts</label>
+    <input class="fixo" type="number" id="watts" value="180" readonly>
+
+    <label>Valor fixo do kWh da energia</label>
+    <input class="fixo" type="number" id="valorKwh" value="1.20" readonly>
+    <small>O cálculo usa energia fixa de R$ 1,20 por kWh.</small>
+
+    <label>Custo extra / desgaste / manutenção</label>
+    <input class="fixo" type="number" id="extra" value="10" readonly>
+
+    <label>Margem de lucro fixa (%)</label>
+    <input class="fixo" type="number" id="margem" value="100" readonly>
+
+    <button onclick="calcular()">Calcular preço</button>
+
+    <div class="erro" id="erro">
+      Preencha gramas e horas corretamente.
+    </div>
+
+    <div class="resultado" id="resultado">
+      <div class="linha">
+        <span>Custo do filamento:</span>
+        <span class="valor" id="custoFilamento"></span>
+      </div>
+
+      <div class="linha">
+        <span>Consumo de energia:</span>
+        <span class="valor" id="consumoEnergia"></span>
+      </div>
+
+      <div class="linha">
+        <span>Custo da energia:</span>
+        <span class="valor" id="custoEnergia"></span>
+      </div>
+
+      <div class="linha">
+        <span>Custo extra / desgaste:</span>
+        <span class="valor" id="custoExtra"></span>
+      </div>
+
+      <div class="linha">
+        <span>Custo total:</span>
+        <span class="valor destaque" id="custoTotal"></span>
+      </div>
+
+      <div class="precos">
+        <h3>Preços sugeridos</h3>
+
+        <div class="linha">
+          <span>Preço mínimo:</span>
+          <span class="valor" id="precoMinimo"></span>
+        </div>
+
+        <div class="linha">
+          <span>Preço sugerido:</span>
+          <span class="valor destaque" id="precoMargem"></span>
+        </div>
+
+        <div class="linha">
+          <span>Preço personalizado:</span>
+          <span class="valor" id="precoPersonalizado"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function dinheiro(valor) {
+      return valor.toLocaleString('pt-BR', {
+        style: 'currency',
+        currency: 'BRL'
+      });
+    }
+
+    function calcular() {
+      const precoRolo = 89;
+      const pesoRolo = 1000;
+      const watts = 180;
+      const valorKwh = 1.20;
+      const extra = 10;
+      const margem = 100;
+
+      const gramasUsadas = parseFloat(document.getElementById('gramasUsadas').value);
+      const horas = parseFloat(document.getElementById('horas').value);
+
+      const erro = document.getElementById('erro');
+      const resultado = document.getElementById('resultado');
+
+      if (
+        isNaN(gramasUsadas) || isNaN(horas) ||
+        gramasUsadas <= 0 || horas <= 0
+      ) {
+        erro.style.display = 'block';
+        resultado.style.display = 'none';
+        return;
+      }
+
+      erro.style.display = 'none';
+
+      const custoPorGrama = precoRolo / pesoRolo;
+      const custoFilamento = custoPorGrama * gramasUsadas;
+
+      const consumoKwh = (watts / 1000) * horas;
+      const custoEnergia = consumoKwh * valorKwh;
+
+      const custoTotal = custoFilamento + custoEnergia + extra;
+
+      const precoMinimo = custoTotal * 1.5;
+      const precoComMargem = custoTotal * (1 + margem / 100);
+      const precoPersonalizado = custoTotal * 2.5;
+
+      document.getElementById('custoFilamento').textContent = dinheiro(custoFilamento);
+      document.getElementById('consumoEnergia').textContent = consumoKwh.toFixed(2).replace('.', ',') + ' kWh';
+      document.getElementById('custoEnergia').textContent = dinheiro(custoEnergia);
+      document.getElementById('custoExtra').textContent = dinheiro(extra);
+      document.getElementById('custoTotal').textContent = dinheiro(custoTotal);
+
+      document.getElementById('precoMinimo').textContent = dinheiro(precoMinimo);
+      document.getElementById('precoMargem').textContent = dinheiro(precoComMargem);
+      document.getElementById('precoPersonalizado').textContent = dinheiro(precoPersonalizado);
+
+      resultado.style.display = 'block';
+    }
+
+    calcular();
+  </script>
+</body>
+</html>
