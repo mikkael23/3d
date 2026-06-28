@@ -1,274 +1,682 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Calculadora de Preço - Impressão 3D</title>
-
+  <title>Calculadora 3D · Precificação</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap"
+    rel="stylesheet">
   <style>
+    :root {
+      --bg: #0d0f14;
+      --surface: #161921;
+      --surface2: #1e2230;
+      --border: #2a2f3f;
+      --accent: #4f8eff;
+      --accent2: #7c5cfc;
+      --green: #22d3a5;
+      --text: #e8ecf4;
+      --muted: #7c8499;
+      --danger: #ff5a5a;
+      --radius: 14px;
+      --radius-sm: 8px;
+    }
+
     * {
       box-sizing: border-box;
-      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
     }
 
     body {
-      margin: 0;
-      background: #f2f4f8;
-      color: #222;
-      padding: 20px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      min-height: 100vh;
+      padding: 32px 16px 64px;
     }
 
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: #fff;
-      padding: 25px;
-      border-radius: 12px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-    }
-
-    h1 {
+    /* ── Header ── */
+    .header {
       text-align: center;
-      margin-bottom: 10px;
+      margin-bottom: 36px;
     }
 
-    p {
-      text-align: center;
-      color: #666;
-      margin-bottom: 25px;
+    .header .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: linear-gradient(135deg, rgba(79, 142, 255, .15), rgba(124, 92, 252, .15));
+      border: 1px solid rgba(79, 142, 255, .3);
+      color: var(--accent);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      padding: 6px 14px;
+      border-radius: 999px;
+      margin-bottom: 16px;
     }
 
-    label {
-      display: block;
-      margin-top: 15px;
-      font-weight: bold;
+    .header h1 {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: clamp(26px, 5vw, 38px);
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text) 30%, var(--accent));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      line-height: 1.15;
     }
 
-    input {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
+    .header p {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 8px;
+    }
+
+    /* ── Layout ── */
+    .layout {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 20px;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    @media (min-width: 720px) {
+      .layout {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .card.full {
+        grid-column: 1 / -1;
+      }
+    }
+
+    /* ── Card ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+
+    .card-title {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .card-title .icon {
       font-size: 16px;
     }
 
-    .fixo {
-      background: #eee;
-      color: #555;
+    /* ── Toggle ── */
+    .toggle {
+      display: flex;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 4px;
+      gap: 4px;
+      margin-bottom: 20px;
     }
 
-    button {
-      width: 100%;
-      margin-top: 25px;
-      padding: 14px;
+    .toggle button {
+      flex: 1;
+      padding: 10px 12px;
       border: none;
-      border-radius: 8px;
-      background: #1f7ae0;
-      color: white;
-      font-size: 18px;
+      background: transparent;
+      color: var(--muted);
+      font-family: 'Inter', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
       cursor: pointer;
-      font-weight: bold;
+      border-radius: 6px;
+      transition: all .2s;
     }
 
-    button:hover {
-      background: #155fb0;
+    .toggle button.ativo {
+      background: var(--accent);
+      color: #fff;
+      box-shadow: 0 2px 12px rgba(79, 142, 255, .4);
     }
 
+    /* ── Field ── */
+    .field {
+      margin-bottom: 16px;
+    }
+
+    .field:last-child {
+      margin-bottom: 0;
+    }
+
+    .field label {
+      display: block;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      letter-spacing: .04em;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+    }
+
+    .field .input-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+
+    .field .prefix {
+      position: absolute;
+      left: 14px;
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 600;
+      pointer-events: none;
+    }
+
+    .field .suffix {
+      position: absolute;
+      right: 14px;
+      font-size: 13px;
+      color: var(--muted);
+      pointer-events: none;
+    }
+
+    .field input {
+      width: 100%;
+      background: var(--surface2);
+      border: 1.5px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 500;
+      padding: 11px 14px;
+      transition: border-color .2s, box-shadow .2s;
+      -webkit-appearance: none;
+    }
+
+    .field input.has-prefix {
+      padding-left: 36px;
+    }
+
+    .field input.has-suffix {
+      padding-right: 52px;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(79, 142, 255, .2);
+    }
+
+    .field .hint {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 5px;
+    }
+
+    /* ── Calc button ── */
+    .btn-calcular {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: var(--radius-sm);
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff;
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 17px;
+      font-weight: 700;
+      cursor: pointer;
+      letter-spacing: .02em;
+      transition: opacity .2s, transform .15s;
+      box-shadow: 0 4px 20px rgba(79, 142, 255, .3);
+    }
+
+    .btn-calcular:hover {
+      opacity: .9;
+      transform: translateY(-1px);
+    }
+
+    .btn-calcular:active {
+      transform: translateY(0);
+    }
+
+    /* ── Resultado ── */
     .resultado {
-      margin-top: 25px;
-      padding: 20px;
-      background: #f8f9fb;
-      border-radius: 10px;
-      border-left: 5px solid #1f7ae0;
       display: none;
     }
 
-    .linha {
+    .resultado.visivel {
+      display: block;
+    }
+
+    /* Resumo de custos */
+    .custos-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .custo-item {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 14px 16px;
+    }
+
+    .custo-item .ci-label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      margin-bottom: 6px;
+    }
+
+    .custo-item .ci-valor {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    /* Total */
+    .total-box {
+      background: linear-gradient(135deg, rgba(79, 142, 255, .1), rgba(124, 92, 252, .1));
+      border: 1px solid rgba(79, 142, 255, .3);
+      border-radius: var(--radius-sm);
+      padding: 18px 20px;
       display: flex;
       justify-content: space-between;
-      padding: 10px 0;
-      border-bottom: 1px solid #ddd;
-      gap: 15px;
+      align-items: center;
+      margin-bottom: 20px;
     }
 
-    .linha:last-child {
-      border-bottom: none;
+    .total-box .tl {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--muted);
     }
 
-    .valor {
-      font-weight: bold;
-      white-space: nowrap;
+    .total-box .tv {
+      font-family: 'Space Grotesk', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
 
-    .destaque {
+    /* Preços sugeridos */
+    .precos-titulo {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .07em;
+      margin-bottom: 12px;
+    }
+
+    .preco-opcao {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 14px 18px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      transition: border-color .2s;
+    }
+
+    .preco-opcao:last-child {
+      margin-bottom: 0;
+    }
+
+    .preco-opcao.destaque {
+      border-color: var(--green);
+      background: rgba(34, 211, 165, .07);
+    }
+
+    .preco-opcao .po-info .po-nome {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    .preco-opcao .po-info .po-desc {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 2px;
+    }
+
+    .preco-opcao .po-valor {
+      font-family: 'Space Grotesk', sans-serif;
       font-size: 20px;
-      color: #1f7ae0;
+      font-weight: 700;
     }
 
-    .precos {
-      margin-top: 20px;
-      padding: 15px;
-      background: #eef6ff;
-      border-radius: 8px;
+    .preco-opcao .po-valor.v-min {
+      color: var(--muted);
     }
 
+    .preco-opcao .po-valor.v-sug {
+      color: var(--green);
+    }
+
+    .preco-opcao .po-valor.v-prem {
+      color: var(--accent2);
+    }
+
+    /* Erro */
     .erro {
-      margin-top: 15px;
-      color: #b00020;
-      font-weight: bold;
-      text-align: center;
+      background: rgba(255, 90, 90, .1);
+      border: 1px solid rgba(255, 90, 90, .4);
+      color: var(--danger);
+      border-radius: var(--radius-sm);
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      display: none;
+      margin-top: 12px;
+    }
+
+    /* Energia inline */
+    .energia-detalhe {
+      font-size: 11px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    /* Divider */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 20px 0;
+    }
+
+    /* Painel oculto */
+    .painel {
       display: none;
     }
 
-    small {
-      color: #777;
+    .painel.visivel {
+      display: block;
     }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h1>Calculadora de Preço 3D</h1>
-    <p>Informe apenas o peso da peça e as horas de impressão.</p>
 
-    <label>Preço do rolo de filamento</label>
-    <input class="fixo" type="number" id="precoRolo" value="89" readonly>
-
-    <label>Peso do rolo em gramas</label>
-    <input class="fixo" type="number" id="pesoRolo" value="1000" readonly>
-
-    <label>Quantidade usada na peça em gramas</label>
-    <input type="number" id="gramasUsadas" placeholder="Ex: 150" value="150" step="0.01">
-
-    <label>Horas de impressão</label>
-    <input type="number" id="horas" placeholder="Ex: 15" value="15" step="0.01">
-
-    <label>Consumo fixo da impressora em watts</label>
-    <input class="fixo" type="number" id="watts" value="180" readonly>
-
-    <label>Valor fixo do kWh da energia</label>
-    <input class="fixo" type="number" id="valorKwh" value="1.20" readonly>
-    <small>O cálculo usa energia fixa de R$ 1,20 por kWh.</small>
-
-    <label>Custo extra / desgaste / manutenção</label>
-    <input class="fixo" type="number" id="extra" value="10" readonly>
-
-    <label>Margem de lucro fixa (%)</label>
-    <input class="fixo" type="number" id="margem" value="100" readonly>
-
-    <button onclick="calcular()">Calcular preço</button>
-
-    <div class="erro" id="erro">
-      Preencha gramas e horas corretamente.
-    </div>
-
-    <div class="resultado" id="resultado">
-      <div class="linha">
-        <span>Custo do filamento:</span>
-        <span class="valor" id="custoFilamento"></span>
-      </div>
-
-      <div class="linha">
-        <span>Consumo de energia:</span>
-        <span class="valor" id="consumoEnergia"></span>
-      </div>
-
-      <div class="linha">
-        <span>Custo da energia:</span>
-        <span class="valor" id="custoEnergia"></span>
-      </div>
-
-      <div class="linha">
-        <span>Custo extra / desgaste:</span>
-        <span class="valor" id="custoExtra"></span>
-      </div>
-
-      <div class="linha">
-        <span>Custo total:</span>
-        <span class="valor destaque" id="custoTotal"></span>
-      </div>
-
-      <div class="precos">
-        <h3>Preços sugeridos</h3>
-
-        <div class="linha">
-          <span>Preço mínimo:</span>
-          <span class="valor" id="precoMinimo"></span>
-        </div>
-
-        <div class="linha">
-          <span>Preço sugerido:</span>
-          <span class="valor destaque" id="precoMargem"></span>
-        </div>
-
-        <div class="linha">
-          <span>Preço personalizado:</span>
-          <span class="valor" id="precoPersonalizado"></span>
-        </div>
-      </div>
-    </div>
+  <div class="header">
+    <div class="badge">🖨️ Impressão 3D</div>
+    <h1>Calculadora de Precificação</h1>
+    <p>Calcule o custo real e o preço ideal para sua peça</p>
   </div>
 
+  <div class="layout">
+
+    <!-- Filamento -->
+    <div class="card">
+      <div class="card-title"><span class="icon">🧵</span> Filamento</div>
+
+      <div class="toggle">
+        <button id="btnRolo" class="ativo" onclick="setModo('rolo')">Por rolo</button>
+        <button id="btnGrama" onclick="setModo('grama')">Por grama</button>
+      </div>
+
+      <div id="painelRolo" class="painel visivel">
+        <div class="field">
+          <label>Preço do rolo</label>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input class="has-prefix" type="number" id="precoRolo" value="89" step="0.01" min="0" oninput="calcular()">
+          </div>
+        </div>
+        <div class="field">
+          <label>Peso do rolo</label>
+          <div class="input-wrap">
+            <input class="has-suffix" type="number" id="pesoRolo" value="1000" step="1" min="1" oninput="calcular()">
+            <span class="suffix">g</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="painelGrama" class="painel">
+        <div class="field">
+          <label>Preço por grama</label>
+          <div class="input-wrap">
+            <span class="prefix">R$</span>
+            <input class="has-prefix has-suffix" type="number" id="precoPorGrama" value="0.089" step="0.001" min="0"
+              oninput="calcular()">
+            <span class="suffix">/g</span>
+          </div>
+          <div class="hint">Ex: rolo R$89 / 1000g = R$0,089/g</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>Gramas usadas na peça</label>
+        <div class="input-wrap">
+          <input class="has-suffix" type="number" id="gramasUsadas" value="150" step="0.01" oninput="calcular()">
+          <span class="suffix">g</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Energia & Extras -->
+    <div class="card">
+      <div class="card-title"><span class="icon">⚡</span> Energia & Impressão</div>
+
+      <div class="field">
+        <label>Horas de impressão</label>
+        <div class="input-wrap">
+          <input class="has-suffix" type="number" id="horas" value="15" step="0.01" oninput="calcular()">
+          <span class="suffix">h</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Consumo da impressora</label>
+        <div class="input-wrap">
+          <input class="has-suffix" type="number" id="watts" value="180" step="1" min="0" oninput="calcular()">
+          <span class="suffix">W</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Custo do kWh</label>
+        <div class="input-wrap">
+          <span class="prefix">R$</span>
+          <input class="has-prefix" type="number" id="valorKwh" value="1.20" step="0.01" min="0" oninput="calcular()">
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card-title" style="margin-bottom:14px;"><span class="icon">🔧</span> Extras & Lucro</div>
+
+      <div class="field">
+        <label>Desgaste / manutenção / extras</label>
+        <div class="input-wrap">
+          <span class="prefix">R$</span>
+          <input class="has-prefix" type="number" id="extra" value="10" step="0.01" min="0" oninput="calcular()">
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Margem de lucro</label>
+        <div class="input-wrap">
+          <input class="has-suffix" type="number" id="margem" value="100" step="1" min="0" oninput="calcular()">
+          <span class="suffix">%</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Botão -->
+    <div class="card full" style="padding:20px;">
+      <button class="btn-calcular" onclick="calcular()">Calcular preço →</button>
+      <div class="erro" id="erro">⚠️ Preencha todos os campos corretamente antes de calcular.</div>
+    </div>
+
+    <!-- Resultado -->
+    <div class="card full resultado" id="resultado">
+      <div class="card-title" style="margin-bottom:20px;"><span class="icon">📊</span> Detalhamento de custos</div>
+
+      <div class="custos-grid">
+        <div class="custo-item">
+          <div class="ci-label">🧵 Filamento</div>
+          <div class="ci-valor" id="custoFilamento">—</div>
+        </div>
+        <div class="custo-item">
+          <div class="ci-label">⚡ Energia</div>
+          <div class="ci-valor" id="custoEnergia">—</div>
+          <div class="energia-detalhe" id="consumoEnergia"></div>
+        </div>
+        <div class="custo-item">
+          <div class="ci-label">🔧 Extras</div>
+          <div class="ci-valor" id="custoExtra">—</div>
+        </div>
+        <div class="custo-item">
+          <div class="ci-label">💰 Margem de lucro</div>
+          <div class="ci-valor" id="lucro" style="color:var(--green)">—</div>
+        </div>
+      </div>
+
+      <div class="total-box">
+        <div>
+          <div class="tl">Custo total de produção</div>
+          <div style="font-size:11px;color:var(--muted);margin-top:3px;">sem margem de lucro</div>
+        </div>
+        <div class="tv" id="custoTotal">—</div>
+      </div>
+
+      <div class="precos-titulo">Preços sugeridos para venda</div>
+
+      <div class="preco-opcao">
+        <div class="po-info">
+          <div class="po-nome">Preço mínimo</div>
+          <div class="po-desc">Multiplicador ×1,5 — margem de segurança</div>
+        </div>
+        <div class="po-valor v-min" id="precoMinimo">—</div>
+      </div>
+
+      <div class="preco-opcao destaque">
+        <div class="po-info">
+          <div class="po-nome">✦ Preço sugerido</div>
+          <div class="po-desc">Com a margem de lucro que você definiu</div>
+        </div>
+        <div class="po-valor v-sug" id="precoMargem">—</div>
+      </div>
+
+      <div class="preco-opcao">
+        <div class="po-info">
+          <div class="po-nome">Preço premium</div>
+          <div class="po-desc">Multiplicador ×2,5 — peças especiais ou urgência</div>
+        </div>
+        <div class="po-valor v-prem" id="precoPersonalizado">—</div>
+      </div>
+    </div>
+
+  </div><!-- /layout -->
+
   <script>
-    function dinheiro(valor) {
-      return valor.toLocaleString('pt-BR', {
-        style: 'currency',
-        currency: 'BRL'
-      });
+    let modo = 'rolo';
+
+    function setModo(m) {
+      modo = m;
+      document.getElementById('painelRolo').classList.toggle('visivel', m === 'rolo');
+      document.getElementById('painelGrama').classList.toggle('visivel', m === 'grama');
+      document.getElementById('btnRolo').classList.toggle('ativo', m === 'rolo');
+      document.getElementById('btnGrama').classList.toggle('ativo', m === 'grama');
+      calcular();
+    }
+
+    function brl(v) {
+      return v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
     }
 
     function calcular() {
-      const precoRolo = 89;
-      const pesoRolo = 1000;
-      const watts = 180;
-      const valorKwh = 1.20;
-      const extra = 10;
-      const margem = 100;
-
       const gramasUsadas = parseFloat(document.getElementById('gramasUsadas').value);
       const horas = parseFloat(document.getElementById('horas').value);
+      const watts = parseFloat(document.getElementById('watts').value);
+      const valorKwh = parseFloat(document.getElementById('valorKwh').value);
+      const extra = parseFloat(document.getElementById('extra').value);
+      const margem = parseFloat(document.getElementById('margem').value);
 
       const erro = document.getElementById('erro');
       const resultado = document.getElementById('resultado');
 
+      let custoPorGrama;
+      if (modo === 'rolo') {
+        const precoRolo = parseFloat(document.getElementById('precoRolo').value);
+        const pesoRolo = parseFloat(document.getElementById('pesoRolo').value);
+        if (isNaN(precoRolo) || isNaN(pesoRolo) || pesoRolo <= 0 || precoRolo < 0) {
+          erro.style.display = 'block'; resultado.classList.remove('visivel'); return;
+        }
+        custoPorGrama = precoRolo / pesoRolo;
+      } else {
+        const precoPorGrama = parseFloat(document.getElementById('precoPorGrama').value);
+        if (isNaN(precoPorGrama) || precoPorGrama < 0) {
+          erro.style.display = 'block'; resultado.classList.remove('visivel'); return;
+        }
+        custoPorGrama = precoPorGrama;
+      }
+
       if (
-        isNaN(gramasUsadas) || isNaN(horas) ||
+        isNaN(gramasUsadas) || isNaN(horas) || isNaN(watts) ||
+        isNaN(valorKwh) || isNaN(extra) || isNaN(margem) ||
         gramasUsadas <= 0 || horas <= 0
       ) {
         erro.style.display = 'block';
-        resultado.style.display = 'none';
+        resultado.classList.remove('visivel');
         return;
       }
 
       erro.style.display = 'none';
 
-      const custoPorGrama = precoRolo / pesoRolo;
       const custoFilamento = custoPorGrama * gramasUsadas;
-
       const consumoKwh = (watts / 1000) * horas;
       const custoEnergia = consumoKwh * valorKwh;
-
       const custoTotal = custoFilamento + custoEnergia + extra;
 
       const precoMinimo = custoTotal * 1.5;
       const precoComMargem = custoTotal * (1 + margem / 100);
       const precoPersonalizado = custoTotal * 2.5;
+      const lucro = precoComMargem - custoTotal;
 
-      document.getElementById('custoFilamento').textContent = dinheiro(custoFilamento);
-      document.getElementById('consumoEnergia').textContent = consumoKwh.toFixed(2).replace('.', ',') + ' kWh';
-      document.getElementById('custoEnergia').textContent = dinheiro(custoEnergia);
-      document.getElementById('custoExtra').textContent = dinheiro(extra);
-      document.getElementById('custoTotal').textContent = dinheiro(custoTotal);
+      document.getElementById('custoFilamento').textContent = brl(custoFilamento);
+      document.getElementById('custoEnergia').textContent = brl(custoEnergia);
+      document.getElementById('consumoEnergia').textContent = consumoKwh.toFixed(2).replace('.', ',') + ' kWh consumidos';
+      document.getElementById('custoExtra').textContent = brl(extra);
+      document.getElementById('lucro').textContent = brl(lucro);
+      document.getElementById('custoTotal').textContent = brl(custoTotal);
+      document.getElementById('precoMinimo').textContent = brl(precoMinimo);
+      document.getElementById('precoMargem').textContent = brl(precoComMargem);
+      document.getElementById('precoPersonalizado').textContent = brl(precoPersonalizado);
 
-      document.getElementById('precoMinimo').textContent = dinheiro(precoMinimo);
-      document.getElementById('precoMargem').textContent = dinheiro(precoComMargem);
-      document.getElementById('precoPersonalizado').textContent = dinheiro(precoPersonalizado);
-
-      resultado.style.display = 'block';
+      resultado.classList.add('visivel');
     }
 
     calcular();
   </script>
 </body>
+
 </html>
